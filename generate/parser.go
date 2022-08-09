@@ -241,7 +241,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 				}
 			}
 
-			pathItemObject, ok := paths[path]
+			pathItemObject, ok := paths["/"+path]
 			if !ok {
 				pathItemObject = swaggerPathItemObject{}
 			}
@@ -315,7 +315,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 				pathItemObject.Patch = operationObject
 			}
 
-			paths[path] = pathItemObject
+			paths["/"+path] = pathItemObject
 		}
 	}
 }
