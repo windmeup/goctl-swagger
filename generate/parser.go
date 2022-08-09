@@ -293,6 +293,13 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 
 			if group.Annotation.Properties["jwt"] != "" {
 				operationObject.Security = &[]swaggerSecurityRequirementObject{{"apiKey": []string{}}}
+				// auto add jwt header
+				operationObject.Parameters = append(operationObject.Parameters,
+					swaggerParameterObject{
+						Name:     "Authorization",
+						In:       "header",
+						Type:     "string",
+						Required: true})
 			}
 
 			switch strings.ToUpper(route.Method) {
