@@ -468,9 +468,6 @@ func schemaOfField(member spec.Member) swaggerSchemaObject {
 	kind := swaggerMapTypes[member.Type.Name()]
 	var props *swaggerSchemaObjectProperties
 
-	comment := member.GetComment()
-	comment = strings.Replace(comment, "//", "", -1)
-
 	switch ft := kind; ft {
 	case reflect.Invalid: //[]Struct 也有可能是 Struct
 		// []Struct
@@ -552,7 +549,7 @@ func schemaOfField(member spec.Member) swaggerSchemaObject {
 			Properties: props,
 		}
 	}
-	ret.Description = comment
+	ret.Description = memberDoc(member)
 
 	for _, tag := range member.Tags() {
 		if len(tag.Options) == 0 {
@@ -645,4 +642,25 @@ func contains(s []string, str string) bool {
 	}
 
 	return false
+}
+
+func memberDoc(member spec.Member) (desc string) {
+	firstLine := true
+	if len(member.Docs) > 0 {
+		for _, doc := range member.Docs {
+			doc = strings.Trim(strings.Replace(doc, "\t", "", -1), " ") // \t comes from goctl format
+			if len(doc) > 0 {
+				if firstLine {
+					firstLine = false
+				} else {
+					desc += "\n"
+				}
+				desc += doc
+			}
+		}
+		if !firstLine {
+			desc = fmt.Sprintf("```\n%s\n```", desc) // markdown code
+		}
+	}
+	return desc
 }
