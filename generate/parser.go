@@ -512,6 +512,9 @@ func schemaOfField(member spec.Member) swaggerSchemaObject {
 			}
 
 		} else {
+			if strings.HasPrefix(refTypeName, "mapstring") { // TODO map 嵌套 map 之类的处理是错误的;目前仅保证 map[string]struct 正确
+				refTypeName = strings.Replace(refTypeName, "mapstring", "", 1)
+			}
 			core = schemaCore{
 				Ref: "#/definitions/" + refTypeName,
 			}
@@ -551,14 +554,20 @@ func schemaOfField(member spec.Member) swaggerSchemaObject {
 					Items: (*swaggerItemsObject)(&core),
 				},
 			}
+		} else if strings.HasPrefix(member.Type.Name(), "map") {
+			ret = swaggerSchemaObject{
+				schemaCore: schemaCore{
+					Type: "object",
+				},
+				AdditionalProperties: &swaggerSchemaObject{
+					schemaCore: core,
+				},
+			}
 		} else {
 			ret = swaggerSchemaObject{
 				schemaCore: core,
 				Properties: props,
 			}
-		}
-		if strings.HasPrefix(member.Type.Name(), "map") {
-			fmt.Println("暂不支持map类型")
 		}
 	default:
 		ret = swaggerSchemaObject{
